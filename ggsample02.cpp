@@ -8,7 +8,7 @@
 //   str: コンパイルエラーが発生した場所を示す文字列
 //   戻り値: コンパイルに成功していたら GL_TRUE
 //
-static GLboolean printShaderInfoLog(GLuint shader, const char *str)
+static GLboolean printShaderInfoLog(GLuint shader, const char* str)
 {
   // コンパイル結果を取得する
   GLint status;
@@ -71,8 +71,8 @@ static GLboolean printProgramInfoLog(GLuint program)
 //   frag: フラグメントシェーダのコンパイル時のメッセージに追加する文字列
 //   戻り値: プログラムオブジェクト名
 //
-static GLuint createProgram(const char *vsrc, const char *pv, const char *fsrc, const char *fc,
-  const char *vert = "vertex shader", const char *frag = "fragment shader")
+static GLuint createProgram(const char* vsrc, const char* pv, const char* fsrc, const char* fc,
+  const char* vert = "vertex shader", const char* frag = "fragment shader")
 {
   // 空のプログラムオブジェクトを作成する
   const GLuint program(glCreateProgram());
@@ -126,7 +126,7 @@ static GLuint createProgram(const char *vsrc, const char *pv, const char *fsrc, 
 //   index: 線分の頂点インデックス
 //   戻り値: 作成された頂点配列オブジェクト名
 //
-static GLuint createObject(GLuint vertices, const GLfloat (*position)[2], GLuint lines, const GLuint *index)
+static GLuint createObject(GLuint vertices, const GLfloat(*position)[3], GLuint lines, const GLuint* index)
 {
   // 頂点配列オブジェクト
   GLuint vao;
@@ -137,16 +137,16 @@ static GLuint createObject(GLuint vertices, const GLfloat (*position)[2], GLuint
   GLuint vbo;
   glGenBuffers(1, &vbo);
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof (GLfloat[2]) * vertices, position, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat[3]) * vertices, position, GL_STATIC_DRAW);
 
   // インデックスバッファオブジェクト
   GLuint ibo;
   glGenBuffers(1, &ibo);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof (GLuint) * lines, index, GL_STATIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * lines, index, GL_STATIC_DRAW);
 
   // 結合されている頂点バッファオブジェクトを in 変数から参照できるようにする
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
   glEnableVertexAttribArray(0);
 
   // 頂点配列オブジェクトの結合を解除した後に頂点バッファオブジェクトとインデックスバッファオブジェクトの結合を解除する
@@ -190,19 +190,34 @@ void app()
   const GLuint program(createProgram(vsrc, "pv", fsrc, "fc"));
 
   // 頂点属性
-  static const GLfloat position[][2] =
+  static const GLfloat position[][3] =
   {
-    { -0.5f, -0.5f },
-    {  0.5f, -0.5f },
-    {  0.5f,  0.5f },
-    { -0.5f,  0.5f }
+    { -0.9f,  0.9f, -0.9f },
+    { -0.9f,  0.9f,  0.9f },
+    {  0.9f,  0.9f, -0.9f },
+    {  0.9f,  0.9f,  0.9f },
+    { -0.9f, -0.9f,  0.9f },
+    { -0.9f, -0.9f, -0.9f },
+    {  0.9f, -0.9f, -0.9f },
+    {  0.9f, -0.9f,  0.9f }
   };
   constexpr int vertices(sizeof position / sizeof position[0]);
 
   // 頂点インデックス
   static const GLuint index[] =
   {
-    0, 2, 1, 3
+    0, 1,
+    0, 2,
+    0, 3,
+    1, 3,
+    1, 4,
+    2, 3,
+    2, 6,
+    3, 7,
+    4, 5,
+    4, 7,
+    5, 6,
+    6, 7
   };
   constexpr GLuint lines(sizeof index / sizeof index[0]);
 
@@ -222,7 +237,7 @@ void app()
     glBindVertexArray(vao);
 
     // 図形の描画
-    glDrawElements(GL_LINE_LOOP, lines, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_LINES, lines, GL_UNSIGNED_INT, 0);
 
     // 頂点配列オブジェクトの指定解除
     glBindVertexArray(0);
